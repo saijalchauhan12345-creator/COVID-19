@@ -1,3 +1,4 @@
+import plotly.express as px
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -43,23 +44,27 @@ st.divider()
 
 # Bar Chart
 st.subheader("📊 Confirmed Cases by Country")
-st.bar_chart(df.set_index("Country")["Confirmed"])
-
-# Pie Chart
-st.subheader("🥧 Cases Distribution")
-
-fig, ax = plt.subplots()
-
-ax.pie(
-    df["Confirmed"],
-    labels=df["Country"],
-    autopct="%1.1f%%"
+fig = px.bar(
+    df,
+    x="Country",
+    y="Confirmed",
+    title="Confirmed Cases by Country"
 )
 
-st.pyplot(fig)
+st.plotly_chart(fig, use_container_width=True)
 
-st.divider()
+# Pie Chart
+st.subheader("📈 Recovered vs Deaths")
 
+fig2 = px.bar(
+    df,
+    x="Country",
+    y=["Recovered", "Deaths"],
+    barmode="group",
+    title="Recovered vs Deaths Comparison"
+)
+
+st.plotly_chart(fig2, use_container_width=True)
 # Search
 st.subheader("🔍 Search Country")
 
