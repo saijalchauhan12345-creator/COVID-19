@@ -75,6 +75,12 @@ if search:
     st.dataframe(result)
 
 st.divider()
+st.download_button(
+    label="📥 Download Dataset",
+    data=df.to_csv(index=False),
+    file_name="covid_data.csv",
+    mime="text/csv"
+)
 
 # Dataset
 st.subheader("📋 Full Dataset")
