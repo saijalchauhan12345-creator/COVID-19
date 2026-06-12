@@ -65,11 +65,12 @@ else:
     filtered_df = df
 
 # Create tabs
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📌 Overview",
     "🌍 Country Analysis",
     "📊 Charts",
-    "🔍 Search & Download"
+    "🔍 Search & Download",
+    "🏆 Leaderboard"
 ])
 
 # ============== TAB 1: OVERVIEW ==============
@@ -270,6 +271,74 @@ with tab4:
     
     st.subheader("📋 Complete Dataset")
     st.dataframe(df, use_container_width=True)
+
+# ============== TAB 5: LEADERBOARD ==============
+with tab5:
+    st.subheader("🏆 Top 3 Countries Leaderboard")
+    
+    col_board1, col_board2, col_board3 = st.columns(3)
+    
+    # Top 3 by Confirmed Cases
+    with col_board1:
+        st.markdown("### 🦠 Most Confirmed Cases")
+        top_cases = df.nlargest(3, "Confirmed")[["Country", "Confirmed"]].reset_index(drop=True)
+        
+        for idx, row in top_cases.iterrows():
+            medal = ["🥇", "🥈", "🥉"][idx]
+            st.metric(
+                f"{medal} {idx + 1}. {row['Country']}",
+                f"{row['Confirmed']:,}"
+            )
+    
+    # Top 3 by Deaths
+    with col_board2:
+        st.markdown("### 💀 Most Deaths")
+        top_deaths = df.nlargest(3, "Deaths")[["Country", "Deaths"]].reset_index(drop=True)
+        
+        for idx, row in top_deaths.iterrows():
+            medal = ["🥇", "🥈", "🥉"][idx]
+            st.metric(
+                f"{medal} {idx + 1}. {row['Country']}",
+                f"{row['Deaths']:,}"
+            )
+    
+    # Top 3 by Recovered
+    with col_board3:
+        st.markdown("### 💚 Most Recovered")
+        top_recovered = df.nlargest(3, "Recovered")[["Country", "Recovered"]].reset_index(drop=True)
+        
+        for idx, row in top_recovered.iterrows():
+            medal = ["🥇", "🥈", "🥉"][idx]
+            st.metric(
+                f"{medal} {idx + 1}. {row['Country']}",
+                f"{row['Recovered']:,}"
+            )
+    
+    st.divider()
+    
+    # Detailed Leaderboard Table
+    st.subheader("📊 Detailed Leaderboard")
+    
+    tab_cases, tab_deaths, tab_recovered = st.tabs([
+        "Confirmed Cases Ranking",
+        "Deaths Ranking",
+        "Recovered Ranking"
+    ])
+    
+    with tab_cases:
+        leaderboard_cases = df[["Country", "Confirmed"]].sort_values("Confirmed", ascending=False).reset_index(drop=True)
+        leaderboard_cases.index = leaderboard_cases.index + 1
+        st.dataframe(leaderboard_cases, use_container_width=True)
+    
+    with tab_deaths:
+        leaderboard_deaths = df[["Country", "Deaths"]].sort_values("Deaths", ascending=False).reset_index(drop=True)
+        leaderboard_deaths.index = leaderboard_deaths.index + 1
+        st.dataframe(leaderboard_deaths, use_container_width=True)
+    
+    with tab_recovered:
+        leaderboard_recovered = df[["Country", "Recovered"]].sort_values("Recovered", ascending=False).reset_index(drop=True)
+        leaderboard_recovered.index = leaderboard_recovered.index + 1
+        st.dataframe(leaderboard_recovered, use_container_width=True)
 
 # Footer
 st.markdown("---")
