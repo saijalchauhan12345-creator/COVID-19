@@ -7,7 +7,8 @@ import plotly.graph_objects as go
 st.set_page_config(
     page_title="COVID Analytics Dashboard",
     page_icon="🦠",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # ── Helper: render any dataframe as a uniform blue HTML table ──
@@ -66,11 +67,74 @@ st.markdown("""
 }
 
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0b0f3d, #090b2f);
-    border-right: 1px solid rgba(255,255,255,.1);
+    background: linear-gradient(180deg, #0a0f3d, #060920) !important;
+    border-right: 1px solid rgba(56,189,248,.2) !important;
+    box-shadow: 4px 0 24px rgba(14,165,233,.12) !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
 }
 
 section[data-testid="stSidebar"] * { color: white; }
+
+/* Sidebar multiselect styling */
+section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+    background: rgba(5,12,50,0.95) !important;
+    border: 1px solid rgba(56,189,248,.4) !important;
+    border-radius: 10px !important;
+}
+
+section[data-testid="stSidebar"] div[data-baseweb="tag"] {
+    background: linear-gradient(135deg, rgba(14,116,144,.6), rgba(30,64,175,.55)) !important;
+    border: 1px solid rgba(56,189,248,.4) !important;
+    border-radius: 6px !important;
+    color: #bae6fd !important;
+}
+
+/* ── Fix: remove empty gap when sidebar is collapsed ── */
+[data-testid="stSidebarCollapsedControl"] {
+    position: fixed !important;
+    top: 14px !important;
+    left: 12px !important;
+    z-index: 999 !important;
+    background: linear-gradient(135deg, rgba(10,15,50,0.98), rgba(5,8,35,0.98)) !important;
+    border: 1px solid rgba(56,189,248,.45) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 0 16px rgba(14,165,233,.35), 0 0 35px rgba(56,189,248,.15) !important;
+    width: 42px !important;
+    height: 42px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+[data-testid="stSidebarCollapsedControl"]:hover {
+    box-shadow: 0 0 24px rgba(14,165,233,.6), 0 0 50px rgba(56,189,248,.25) !important;
+    border-color: rgba(56,189,248,.8) !important;
+}
+
+[data-testid="stSidebarCollapsedControl"] svg {
+    color: #bae6fd !important;
+    stroke: #bae6fd !important;
+}
+
+/* ── KEY FIX: collapse the dead space on the left ── */
+.stMainBlockContainer, [data-testid="stMainBlockContainer"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+section[data-testid="stSidebar"][aria-expanded="false"] ~ * {
+    margin-left: 0 !important;
+}
+
+/* Remove the grey collapsed sidebar strip */
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+div[data-testid="stSidebarUserContent"] {
+    padding-top: 2rem;
+}
 
 /* ── Neon KPI Cards ── */
 [data-testid="stMetric"] {
@@ -112,6 +176,61 @@ section[data-testid="stSidebar"] * { color: white; }
 
 h1 { letter-spacing: -2px; }
 
+/* ── Multiselect Filter ── */
+div[data-baseweb="select"] > div {
+    background: rgba(5,12,40,0.95) !important;
+    border: 1px solid rgba(56,189,248,.4) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 0 12px rgba(14,165,233,.15) !important;
+    color: #e0f2fe !important;
+}
+
+div[data-baseweb="select"] span {
+    color: #e0f2fe !important;
+}
+
+/* Tags (selected country chips) */
+div[data-baseweb="tag"] {
+    background: linear-gradient(135deg, rgba(14,116,144,.6), rgba(30,64,175,.55)) !important;
+    border: 1px solid rgba(56,189,248,.4) !important;
+    border-radius: 6px !important;
+    color: #bae6fd !important;
+}
+
+/* Dropdown list */
+ul[data-baseweb="menu"] {
+    background: rgba(5,12,40,0.98) !important;
+    border: 1px solid rgba(56,189,248,.3) !important;
+    border-radius: 10px !important;
+}
+
+ul[data-baseweb="menu"] li {
+    color: #e0f2fe !important;
+    background: transparent !important;
+}
+
+ul[data-baseweb="menu"] li:hover {
+    background: rgba(14,165,233,.18) !important;
+}
+
+/* ── Download Button ── */
+[data-testid="stDownloadButton"] button {
+    background: linear-gradient(135deg, rgba(14,116,144,.5), rgba(30,64,175,.5)) !important;
+    color: #bae6fd !important;
+    border: 1px solid rgba(56,189,248,.45) !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: .4px !important;
+    box-shadow: 0 0 14px rgba(14,165,233,.25), 0 0 30px rgba(56,189,248,.1) !important;
+    transition: all .25s ease !important;
+}
+
+[data-testid="stDownloadButton"] button:hover {
+    background: linear-gradient(135deg, rgba(14,116,144,.75), rgba(30,64,175,.7)) !important;
+    box-shadow: 0 0 22px rgba(14,165,233,.45), 0 0 50px rgba(56,189,248,.2) !important;
+    color: #ffffff !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -135,15 +254,31 @@ Interactive Analytics using Streamlit
 
 st.divider()
 
-# ── Sidebar ──
-st.sidebar.header("⚙️ Filters")
-st.sidebar.markdown("# 🌎 FILTERS\nSelect Countries")
+# ── Sidebar Filter ──
+st.sidebar.markdown("""
+<div style="text-align:center; padding: 10px 0 18px 0;">
+  <span style="font-size:32px;">🦠</span>
+  <p style="color:#bae6fd;font-size:15px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;margin:6px 0 0 0;">Filters</p>
+</div>
+""", unsafe_allow_html=True)
+
+st.sidebar.markdown("""
+<p style="color:#94a3b8;font-size:12px;font-weight:600;letter-spacing:.5px;
+text-transform:uppercase;margin-bottom:6px;">🌍 Select Countries</p>
+""", unsafe_allow_html=True)
+
+all_countries = list(df["Country"].unique())
 
 selected_countries = st.sidebar.multiselect(
-    "🌍 Select Countries",
-    df["Country"].unique(),
-    default=df["Country"].unique()
+    label="Countries",
+    options=all_countries,
+    default=all_countries,
+    label_visibility="collapsed"
 )
+
+if not selected_countries:
+    selected_countries = all_countries
 
 filtered_df = df[df["Country"].isin(selected_countries)]
 
