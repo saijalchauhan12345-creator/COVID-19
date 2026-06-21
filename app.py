@@ -14,7 +14,74 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ── Helper: blue HTML table ──
+# ── Theme State ──
+if "theme" not in st.session_state:
+    st.session_state.theme = "Dark Neon"
+
+THEMES = {
+    "Dark Neon": {
+        "bg": "radial-gradient(circle at 20% 0%, #0a0f2e 0%, #050816 45%, #030510 100%)",
+        "text": "#e2e8f0",
+        "card_bg": "rgba(255,255,255,0.035)",
+        "card_border": "rgba(139,92,246,.4)",
+        "accent1": "#a78bfa",
+        "accent2": "#f472b6",
+        "table_header": "linear-gradient(90deg,rgba(14,116,144,.8),rgba(30,64,175,.7))",
+        "table_text": "#bae6fd",
+        "row_even": "rgba(6,16,52,0.92)",
+        "row_odd": "rgba(10,26,70,0.82)",
+        "muted": "#64748b",
+        "map_ocean": "rgba(2,4,25,1)",
+        "map_land": "rgba(20,20,45,0.6)",
+        "map_coast": "rgba(129,140,248,0.3)",
+        "map_wrap_bg": "rgba(255,255,255,0.04)",
+        "hover_bg": "rgba(10,10,40,0.95)",
+        "hover_text": "#ffffff",
+    },
+    "Light": {
+        "bg": "radial-gradient(circle at 20% 0%, #f8fafc 0%, #eef2f7 45%, #e8ecf3 100%)",
+        "text": "#1e293b",
+        "card_bg": "rgba(255,255,255,0.85)",
+        "card_border": "rgba(124,58,237,.25)",
+        "accent1": "#7c3aed",
+        "accent2": "#db2777",
+        "table_header": "linear-gradient(90deg,rgba(186,230,253,.9),rgba(196,181,253,.8))",
+        "table_text": "#1e293b",
+        "row_even": "rgba(255,255,255,0.9)",
+        "row_odd": "rgba(241,245,249,0.95)",
+        "muted": "#64748b",
+        "map_ocean": "rgba(219,234,254,0.6)",
+        "map_land": "rgba(241,245,249,0.9)",
+        "map_coast": "rgba(124,58,237,0.35)",
+        "map_wrap_bg": "rgba(255,255,255,0.9)",
+        "hover_bg": "rgba(255,255,255,0.98)",
+        "hover_text": "#1e293b",
+    },
+    "Blue Only": {
+        "bg": "radial-gradient(circle at 20% 0%, #061226 0%, #030a18 45%, #02060f 100%)",
+        "text": "#dbeafe",
+        "card_bg": "rgba(56,189,248,0.04)",
+        "card_border": "rgba(56,189,248,.45)",
+        "accent1": "#38bdf8",
+        "accent2": "#0ea5e9",
+        "table_header": "linear-gradient(90deg,rgba(14,116,144,.85),rgba(8,47,73,.85))",
+        "table_text": "#bae6fd",
+        "row_even": "rgba(4,18,46,0.92)",
+        "row_odd": "rgba(7,30,75,0.85)",
+        "muted": "#60a5fa",
+        "map_ocean": "rgba(2,10,24,1)",
+        "map_land": "rgba(10,30,55,0.6)",
+        "map_coast": "rgba(56,189,248,0.35)",
+        "map_wrap_bg": "rgba(56,189,248,0.04)",
+        "hover_bg": "rgba(4,15,35,0.95)",
+        "hover_text": "#dbeafe",
+    },
+}
+
+
+T = THEMES[st.session_state.theme]
+
+# ── Helper: themed HTML table ──
 def blue_table(dataframe):
     fmt = dataframe.copy()
     for col in fmt.select_dtypes(include='number').columns:
@@ -25,9 +92,9 @@ def blue_table(dataframe):
 
     rows_html = ""
     for i, (_, row) in enumerate(fmt.iterrows()):
-        bg = "rgba(6,16,52,0.92)" if i % 2 == 0 else "rgba(10,26,70,0.82)"
+        bg = T["row_even"] if i % 2 == 0 else T["row_odd"]
         cells = "".join(
-            f"<td style='padding:11px 18px;color:#e0f2fe;font-size:13.5px;"
+            f"<td style='padding:11px 18px;color:{T['text']};font-size:13.5px;"
             f"font-weight:500;border-bottom:1px solid rgba(56,189,248,0.1);"
             f"transition:background .15s ease;'>{v}</td>"
             for v in row
@@ -40,8 +107,8 @@ def blue_table(dataframe):
 
     headers = "".join(
         f"<th style='padding:13px 18px;text-align:left;"
-        f"background:linear-gradient(90deg,rgba(14,116,144,.8),rgba(30,64,175,.7));"
-        f"color:#bae6fd;font-weight:700;font-size:11.5px;letter-spacing:.7px;"
+        f"background:{T['table_header']};"
+        f"color:{T['table_text']};font-weight:700;font-size:11.5px;letter-spacing:.7px;"
         f"text-transform:uppercase;border-bottom:2px solid rgba(56,189,248,.55);'>{c}</th>"
         for c in fmt.columns
     )
@@ -68,7 +135,7 @@ st.markdown("""
 }
 
 html, body, .stApp {
-    background: radial-gradient(circle at 20% 0%, #0a0f2e 0%, #050816 45%, #030510 100%) !important;
+    background: #050816 !important;
     color: #e2e8f0;
     scroll-behavior: smooth;
 }
@@ -443,10 +510,174 @@ div[data-testid="stAlertContainer"][class*="info"],
 </style>
 """, unsafe_allow_html=True)
 
+# ── Theme-specific override (background, text, accent colors) ──
+st.markdown(f"""
+<style>
+html, body, .stApp {{
+    background: {T['bg']} !important;
+    color: {T['text']} !important;
+}}
+
+[data-testid="stMetric"] {{
+    background: {T['card_bg']} !important;
+    border-color: {T['card_border']} !important;
+}}
+
+h1, h2, h3, p, span, label, .stMarkdown {{
+    color: {T['text']} !important;
+}}
+
+[data-testid="stCaptionContainer"] {{
+    color: {T['muted']} !important;
+}}
+
+/* ── Filter expander button (Filters toggle) ── */
+[data-testid="stExpander"] summary {{
+    background: {T['card_bg']} !important;
+    border: 1px solid {T['card_border']} !important;
+    color: {T['text']} !important;
+}}
+
+[data-testid="stExpander"] summary:hover {{
+    color: {T['accent1']} !important;
+    border-color: {T['accent1']} !important;
+}}
+
+[data-testid="stExpander"] > div[data-testid="stExpanderDetails"] {{
+    background: {T['card_bg']} !important;
+    border: 1px solid {T['card_border']} !important;
+}}
+
+[data-testid="stExpander"] summary svg::after,
+[data-testid="stExpander"] summary [data-testid="stIconMaterial"]::after {{
+    color: {T['accent1']} !important;
+}}
+
+/* ── Multiselect / Selectbox / Text input ── */
+div[data-baseweb="select"] > div {{
+    background: {T['card_bg']} !important;
+    border: 1px solid {T['card_border']} !important;
+    color: {T['text']} !important;
+}}
+
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] div {{
+    color: {T['text']} !important;
+}}
+
+div[data-baseweb="tag"] {{
+    background: {T['table_header']} !important;
+    border: 1px solid {T['card_border']} !important;
+    color: {T['table_text']} !important;
+}}
+
+div[data-baseweb="tag"] span {{
+    color: {T['table_text']} !important;
+}}
+
+ul[data-baseweb="menu"] {{
+    background: {T['card_bg']} !important;
+    border: 1px solid {T['card_border']} !important;
+}}
+
+ul[data-baseweb="menu"] li {{
+    color: {T['text']} !important;
+}}
+
+.stTextInput > div > div,
+.stSelectbox > div > div {{
+    background: {T['card_bg']} !important;
+    border: 1px solid {T['card_border']} !important;
+}}
+
+.stTextInput input {{ color: {T['text']} !important; }}
+
+label, .stTextInput label, .stSelectbox label {{
+    color: {T['muted']} !important;
+}}
+
+/* ── Buttons ── */
+.stButton button,
+[data-testid="stDownloadButton"] button {{
+    background: {T['card_bg']} !important;
+    color: {T['text']} !important;
+    border: 1px solid {T['card_border']} !important;
+}}
+
+.stButton button:hover,
+[data-testid="stDownloadButton"] button:hover {{
+    color: {T['accent1']} !important;
+    border-color: {T['accent1']} !important;
+}}
+
+/* ── Tabs ── */
+[data-testid="stTabs"] [data-baseweb="tab"] {{
+    color: {T['muted']} !important;
+}}
+
+[data-testid="stTabs"] [data-baseweb="tab"]:hover {{
+    color: {T['accent1']} !important;
+}}
+
+[data-testid="stTabs"] [aria-selected="true"] {{
+    color: {T['text']} !important;
+}}
+
+/* ── Alerts (info/success/warning/error) ── */
+[data-testid="stAlertContainer"] p,
+[data-testid="stAlertContainer"] span {{
+    color: {T['text']} !important;
+}}
+
+/* ── Theme Toggle Buttons ── */
+.stButton button[kind="secondary"] {{
+    background: {T['card_bg']} !important;
+    color: {T['muted']} !important;
+    border: 1px solid {T['card_border']} !important;
+    font-weight: 600 !important;
+}}
+
+.stButton button[kind="secondary"]:hover {{
+    color: {T['accent1']} !important;
+    border-color: {T['accent1']} !important;
+}}
+
+.stButton button[kind="primary"] {{
+    background: linear-gradient(135deg, {T['accent1']}, {T['accent2']}) !important;
+    color: #ffffff !important;
+    border: 1px solid {T['accent1']} !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 16px {T['accent1']}55 !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
 # ── Load Data ──
 df = pd.read_csv("covid_data.csv")
 df["Recovery Rate"] = (df["Recovered"] / df["Confirmed"] * 100).round(2)
 all_countries = list(df["Country"].unique())
+
+# ── Theme Toggle (button row) ──
+theme_left, theme_right = st.columns([3, 2])
+with theme_right:
+    tbtn1, tbtn2, tbtn3 = st.columns(3)
+    theme_buttons = {
+        "Dark Neon": (tbtn1, "🌑 Dark"),
+        "Light": (tbtn2, "☀️ Light"),
+        "Blue Only": (tbtn3, "🔵 Blue"),
+    }
+    for theme_name, (col, label) in theme_buttons.items():
+        with col:
+            is_active = st.session_state.theme == theme_name
+            if st.button(
+                label,
+                key=f"theme_btn_{theme_name}",
+                use_container_width=True,
+                type="primary" if is_active else "secondary",
+            ):
+                if not is_active:
+                    st.session_state.theme = theme_name
+                    st.rerun()
 
 # ── Header ──
 st.markdown("""
@@ -505,8 +736,8 @@ col4.metric("📈 Recovery %", f"{recovery_rate:.2f}%")
 col5.metric("📉 Death %",    f"{death_rate:.2f}%")
 
 # ── Tabs ──
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["📊 Dashboard", "📋 Dataset", "🏆 Rankings", "🔮 Prediction"]
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    ["📊 Dashboard", "📋 Dataset", "🏆 Rankings", "🔮 Prediction", "🗺️ World Map"]
 )
 
 # ════════════════════════════════════════
@@ -535,22 +766,22 @@ with tab1:
     fig_bar.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font_color='#ccccff',
+        font_color=T["text"],
         showlegend=False,
         height=420,
         margin=dict(l=20, r=20, t=40, b=40),
         yaxis=dict(
             gridcolor='rgba(129,140,248,0.15)',
-            color='#818cf8',
+            color=T["muted"],
             tickfont=dict(size=11),
             zerolinecolor='rgba(129,140,248,0.3)',
         ),
-        xaxis=dict(color='#a5b4fc', tickfont=dict(size=13)),
+        xaxis=dict(color=T["muted"], tickfont=dict(size=13)),
         bargap=0.28,
         hoverlabel=dict(
-            bgcolor='rgba(10,10,40,0.95)',
-            bordercolor='rgba(129,140,248,0.8)',
-            font=dict(color='white', size=13)
+            bgcolor=T["hover_bg"],
+            bordercolor=T["card_border"],
+            font=dict(color=T["hover_text"], size=13)
         ),
     )
     fig_bar.update_traces(marker_line_width=0, selector=dict(type="bar"))
@@ -561,17 +792,17 @@ with tab1:
         line=dict(color="rgba(129,140,248,0.3)", width=1),
         fillcolor="rgba(0,0,0,0)")
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="chart-wrap" style="
         border-radius:20px;
-        border:1px solid rgba(139,92,246,0.45);
+        border:1px solid {T['card_border']};
         box-shadow:
-            0 0 20px rgba(124,58,237,0.55),
-            0 0 45px rgba(124,58,237,0.25),
-            inset 0 0 30px rgba(124,58,237,0.08);
+            0 0 20px rgba(124,58,237,0.4),
+            0 0 45px rgba(124,58,237,0.18),
+            inset 0 0 30px rgba(124,58,237,0.06);
         overflow:hidden;
         padding:6px;
-        background: rgba(255,255,255,0.04);
+        background: {T['map_wrap_bg']};
         backdrop-filter: blur(12px);
         transition: box-shadow 0.3s ease, transform 0.3s ease;
     ">
@@ -592,34 +823,34 @@ with tab1:
     fig_pie.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font_color='#ccccff',
+        font_color=T["text"],
         margin=dict(l=10, r=10, t=40, b=10),
-        legend=dict(font=dict(color='#c4c4ff', size=12), bgcolor='rgba(0,0,0,0)'),
+        legend=dict(font=dict(color=T["text"], size=12), bgcolor='rgba(0,0,0,0)'),
         hoverlabel=dict(
-            bgcolor='rgba(10,10,40,0.95)',
-            bordercolor='rgba(244,114,182,0.8)',
-            font=dict(color='white', size=13)
+            bgcolor=T["hover_bg"],
+            bordercolor=T["card_border"],
+            font=dict(color=T["hover_text"], size=13)
         ),
     )
     fig_pie.update_traces(
-        textfont_color='white',
+        textfont_color='white' if st.session_state.theme != "Light" else '#1e293b',
         textfont_size=13,
         pull=[0.07] * len(filtered_df),
-        marker=dict(line=dict(color='#02041a', width=3)),
+        marker=dict(line=dict(color=T["map_ocean"], width=3)),
         rotation=45,
     )
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="chart-wrap" style="
         border-radius:20px;
-        border:1px solid rgba(236,72,153,0.45);
+        border:1px solid {T['card_border']};
         box-shadow:
-            0 0 20px rgba(236,72,153,0.55),
-            0 0 45px rgba(236,72,153,0.25),
-            inset 0 0 30px rgba(236,72,153,0.08);
+            0 0 20px rgba(236,72,153,0.4),
+            0 0 45px rgba(236,72,153,0.18),
+            inset 0 0 30px rgba(236,72,153,0.06);
         overflow:hidden;
         padding:6px;
-        background: rgba(255,255,255,0.04);
+        background: {T['map_wrap_bg']};
         backdrop-filter: blur(12px);
         transition: box-shadow 0.3s ease, transform 0.3s ease;
     ">
@@ -859,26 +1090,26 @@ with tab4:
             fig_pred.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
-                font_color='#ccccff',
+                font_color=T["text"],
                 height=420,
                 margin=dict(l=20, r=20, t=30, b=40),
-                yaxis=dict(gridcolor='rgba(129,140,248,0.15)', color='#a5b4fc',
+                yaxis=dict(gridcolor='rgba(129,140,248,0.15)', color=T["muted"],
                            title="Confirmed Cases"),
-                xaxis=dict(color='#a5b4fc'),
-                legend=dict(font=dict(color='#c4c4ff', size=12),
+                xaxis=dict(color=T["muted"]),
+                legend=dict(font=dict(color=T["text"], size=12),
                             bgcolor='rgba(0,0,0,0)', orientation="h", y=1.1),
-                hoverlabel=dict(bgcolor='rgba(10,10,40,0.95)',
-                                 bordercolor='rgba(244,114,182,0.8)',
-                                 font=dict(color='white', size=12)),
+                hoverlabel=dict(bgcolor=T["hover_bg"],
+                                 bordercolor=T["card_border"],
+                                 font=dict(color=T["hover_text"], size=12)),
             )
 
-            st.markdown("""
+            st.markdown(f"""
             <div class="chart-wrap" style="
                 border-radius:20px;
-                border:1px solid rgba(244,114,182,0.4);
-                box-shadow:0 0 20px rgba(244,114,182,0.4),0 0 45px rgba(244,114,182,0.18),
-                    inset 0 0 30px rgba(244,114,182,0.06);
-                overflow:hidden;padding:6px;background:rgba(255,255,255,0.04);
+                border:1px solid {T['card_border']};
+                box-shadow:0 0 20px rgba(244,114,182,0.35),0 0 45px rgba(244,114,182,0.15),
+                    inset 0 0 30px rgba(244,114,182,0.05);
+                overflow:hidden;padding:6px;background:{T['map_wrap_bg']};
                 backdrop-filter:blur(12px);">
             """, unsafe_allow_html=True)
             st.plotly_chart(fig_pred, use_container_width=True)
@@ -899,6 +1130,87 @@ with tab4:
                 "Forecast is a simple linear trend — actual future cases depend on many "
                 "real-world factors not captured by this model."
             )
+
+# ════════════════════════════════════════
+# TAB 5 — World Map (Choropleth)
+# ════════════════════════════════════════
+with tab5:
+
+    st.subheader("🗺️ Global Cases — Choropleth Map")
+    st.caption("Countries shaded by confirmed case count. Hover for details.")
+
+    map_metric = st.selectbox(
+        "Color countries by",
+        options=["Confirmed", "Deaths", "Recovered", "Recovery Rate"],
+        index=0,
+        key="map_metric"
+    )
+
+    color_scales = {
+        "Confirmed": "Purples",
+        "Deaths": "Reds",
+        "Recovered": "Greens",
+        "Recovery Rate": "Blues",
+    }
+
+    fig_map = px.choropleth(
+        filtered_df,
+        locations="Country",
+        locationmode="country names",
+        color=map_metric,
+        hover_name="Country",
+        hover_data={
+            "Confirmed": ":,",
+            "Deaths": ":,",
+            "Recovered": ":,",
+            "Recovery Rate": ":.2f",
+        },
+        color_continuous_scale=color_scales.get(map_metric, "Purples"),
+        projection="natural earth",
+    )
+
+    fig_map.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font_color=T["text"],
+        height=520,
+        margin=dict(l=10, r=10, t=20, b=10),
+        geo=dict(
+            bgcolor='rgba(0,0,0,0)',
+            lakecolor=T["map_ocean"],
+            landcolor=T["map_land"],
+            showframe=False,
+            showcoastlines=True,
+            coastlinecolor=T["map_coast"],
+            showocean=True,
+            oceancolor=T["map_ocean"],
+        ),
+        coloraxis_colorbar=dict(
+            title=dict(text=map_metric, font=dict(color=T["text"])),
+            tickfont=dict(color=T["text"]),
+        ),
+        hoverlabel=dict(
+            bgcolor=T["hover_bg"],
+            bordercolor=T["card_border"],
+            font=dict(color=T["hover_text"], size=12)
+        ),
+    )
+
+    st.markdown(f"""
+    <div class="chart-wrap" style="
+        border-radius:20px;
+        border:1px solid {T['card_border']};
+        box-shadow:0 0 20px rgba(124,58,237,0.25),0 0 45px rgba(124,58,237,0.1),
+            inset 0 0 30px rgba(124,58,237,0.04);
+        overflow:hidden;padding:6px;background:{T['map_wrap_bg']};
+        backdrop-filter:blur(12px);">
+    """, unsafe_allow_html=True)
+    st.plotly_chart(fig_map, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    if not filtered_df.empty:
+        top_map = filtered_df.loc[filtered_df[map_metric].idxmax(), "Country"]
+        st.info(f"🌍 Highest **{map_metric}**: **{top_map}**")
 
 # ── Footer ──
 st.markdown("---")
