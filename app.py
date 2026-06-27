@@ -653,7 +653,12 @@ label, .stTextInput label, .stSelectbox label {{
 """, unsafe_allow_html=True)
 
 # ── Load Data ──
+
 df = pd.read_csv("covid_data.csv")
+
+st.success("COVID dataset loaded successfully ✅")
+st.info(f"Dataset contains {df.shape[0]} rows and {df.shape[1]} columns")
+
 df["Recovery Rate"] = (df["Recovered"] / df["Confirmed"] * 100).round(2)
 all_countries = list(df["Country"].unique())
 
